@@ -22,13 +22,18 @@ const App: React.FC = () => {
                         style={{height: '100%'}}
                         defaultSelectedKeys={selectedKeys}
                         items={[
-                            {itemKey: 'profile', text: '个人中心', icon: <IconUser size="large"/>, link: '/profile'},
+                            {
+                                itemKey: 'profile',
+                                text: '个人中心',
+                                icon: <IconUser size="large"/>,
+                                link: '/profile'
+                            },
                             {
                                 itemKey: 'videos',
                                 text: '视频列表',
                                 icon: <IconVideoListStroked size="large"/>,
                                 link: '/videos'
-                            }
+                            },
                         ]}
                         onSelect={handleSelect}
                         renderWrapper={({itemElement, props}) => {
