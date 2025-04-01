@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Layout, Nav} from '@douyinfe/semi-ui';
-import {IconUser, IconVideoListStroked} from '@douyinfe/semi-icons';
+import {IconUser, IconVideoListStroked, IconEdit} from '@douyinfe/semi-icons';
 import {Link, Outlet} from 'react-router-dom';
 import {NavItemProps} from '@douyinfe/semi-ui/lib/es/navigation';
 import './App.css';
@@ -17,6 +17,12 @@ const navItems: NavItemProps[] = [
         text: '视频列表',
         icon: <IconVideoListStroked size="large"/>,
         link: '/videos'
+    },
+    {
+        itemKey: 'script-generator',
+        text: '脚本生成',
+        icon: <IconEdit size="large"/>,
+        link: '/script-generator'
     },
 ];
 

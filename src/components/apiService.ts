@@ -29,8 +29,19 @@ export interface UserProfile {
   avatar: string;
 }
 
+// 脚本生成结果接口定义
+export interface ScriptResult {
+  title: string;
+  content: string;
+  scenes: Array<{
+    description: string;
+    dialogue?: string;
+    actions?: string;
+  }>;
+}
+
 // 导入模拟数据服务
-import { getMockVideos, getMockUserProfile } from './mockService';
+import { getMockVideos, getMockUserProfile, getMockScriptResult } from './mockService';
 
 // 判断是否使用模拟数据（开发环境）
 // 实际项目中可以根据环境变量来判断
@@ -96,4 +107,25 @@ export async function getUserProfile(): Promise<UserProfile> {
   }
   // 否则调用实际API
   return request<UserProfile>('/user/profile');
+}
+
+/**
+ * 生成拍摄脚本
+ * @param formData 包含服装图片、场景图片和提示词的表单数据
+ * @returns Promise<ScriptResult>
+ */
+export async function generateScript(formData: FormData): Promise<ScriptResult> {
+  // 如果使用模拟数据，则返回模拟数据
+  if (USE_MOCK) {
+    return getMockScriptResult();
+  }
+  
+  // 否则调用实际API
+  const options: RequestInit = {
+    method: 'POST',
+    body: formData,
+    headers: {}
+  };
+  
+  return request<ScriptResult>('/generate/script', options);
 }

@@ -1,6 +1,7 @@
 import {createHashRouter, Navigate} from 'react-router-dom';
 import Profile from './pages/Profile';
 import VideoList from './pages/VideoList';
+import ScriptGenerator from './pages/ScriptGenerator';
 import App from './App';
 
 const router = createHashRouter([
@@ -17,8 +18,12 @@ const router = createHashRouter([
                 element: <VideoList/>
             },
             {
+                path: 'script-generator',
+                element: <ScriptGenerator/>
+            },
+            {
                 path: '',
-                element: <Navigate to="profile"/>
+                element: <Navigate to="script-generator"/>
             }
         ]
     }
