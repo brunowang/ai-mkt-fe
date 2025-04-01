@@ -1,49 +1,48 @@
-import React from 'react';
-import {Typography, Card, List, Avatar, Tag, Space} from '@douyinfe/semi-ui';
+import React, { useState, useEffect } from 'react';
+import {Typography, Card, List, Avatar, Tag, Space, Spin} from '@douyinfe/semi-ui';
 import {IconLikeThumb, IconComment} from '@douyinfe/semi-icons';
+import { getVideos, Video } from '../components/apiService';
 
 const VideoList: React.FC = () => {
     const {Title} = Typography;
+    const [videoList, setVideoList] = useState<Video[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>('');
 
-    // 模拟视频数据
-    const videoList = [
-        {
-            id: 1,
-            title: '如何使用React和Semi Design构建现代化UI',
-            cover: 'https://sf6-cdn-tos.douyinstatic.com/obj/eden-cn/ptlz_zlp/ljhwZthlaukjlkulzlp/root-web-sites/avatarDemo.jpeg',
-            author: 'Bruno Wang',
-            duration: '15:32',
-            views: '2.5万',
-            likes: 326,
-            comments: 42,
-            time: '2024-05-01',
-            tags: ['React', 'Semi UI', '前端开发']
-        },
-        {
-            id: 2,
-            title: '前端工程化实践 - 从零搭建React开发环境',
-            cover: 'https://sf6-cdn-tos.douyinstatic.com/obj/eden-cn/ptlz_zlp/ljhwZthlaukjlkulzlp/root-web-sites/avatarDemo.jpeg',
-            author: 'Bruno Wang',
-            duration: '23:17',
-            views: '1.8万',
-            likes: 258,
-            comments: 36,
-            time: '2024-04-25',
-            tags: ['工程化', 'Webpack', 'Vite']
-        },
-        {
-            id: 3,
-            title: 'React Hooks深入解析',
-            cover: 'https://sf6-cdn-tos.douyinstatic.com/obj/eden-cn/ptlz_zlp/ljhwZthlaukjlkulzlp/root-web-sites/avatarDemo.jpeg',
-            author: 'Bruno Wang',
-            duration: '18:45',
-            views: '3.2万',
-            likes: 476,
-            comments: 58,
-            time: '2024-04-15',
-            tags: ['React', 'Hooks', '状态管理']
-        }
-    ];
+    useEffect(() => {
+        const fetchVideos = async () => {
+            try {
+                setLoading(true);
+                const data = await getVideos();
+                setVideoList(data);
+                setError('');
+            } catch (err) {
+                console.error('获取视频列表失败:', err);
+                setError('获取视频列表失败，请稍后重试');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchVideos();
+    }, []);
+
+    if (loading) {
+        return (
+            <div style={{padding: '20px', textAlign: 'center'}}>
+                <Spin size="large" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div style={{padding: '20px'}}>
+                <Title heading={2}>视频列表</Title>
+                <div style={{padding: '20px', color: 'red'}}>{error}</div>
+            </div>
+        );
+    }
 
     return (
         <div style={{padding: '20px'}}>
