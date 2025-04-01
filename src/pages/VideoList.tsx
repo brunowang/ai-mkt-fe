@@ -1,6 +1,6 @@
 import React from 'react';
 import {Typography, Card, List, Avatar, Tag, Space} from '@douyinfe/semi-ui';
-import {IconVideoListStroked, IconLikeThumb, IconComment} from '@douyinfe/semi-icons';
+import {IconLikeThumb, IconComment} from '@douyinfe/semi-icons';
 
 const VideoList: React.FC = () => {
     const {Title} = Typography;
