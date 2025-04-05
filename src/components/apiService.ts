@@ -40,8 +40,31 @@ export interface ScriptResult {
   }>;
 }
 
+// 视频脚本生成结果接口定义
+export interface VideoScriptResult {
+  title: string;
+  content: string;
+  scenes: Array<{
+    description: string;
+    dialogue?: string;
+    actions?: string;
+    shotType?: string;
+    duration?: string;
+  }>;
+  tips?: string; // 视频拍摄提示
+  equipment?: string[]; // 推荐使用的设备
+}
+
+// 图片上传响应接口定义
+export interface ImageUploadResult {
+  url: string;
+  fileName: string;
+  fileSize: number;
+  uploadTime: string;
+}
+
 // 导入模拟数据服务
-import { getMockVideos, getMockUserProfile, getMockScriptResult } from './mockService';
+import { getMockVideos, getMockUserProfile, getMockScriptResult, getMockImageUpload, getMockVideoScriptResult } from './mockService';
 
 // 判断是否使用模拟数据（开发环境）
 // 实际项目中可以根据环境变量来判断
@@ -128,4 +151,94 @@ export async function generateScript(formData: FormData): Promise<ScriptResult> 
   };
   
   return request<ScriptResult>('/generate/script', options);
+}
+
+/**
+ * 上传图片
+ * @param name 文件名
+ * @param base64 图片的base64编码
+ * @returns Promise<ImageUploadResult>
+ */
+export async function uploadImage(name: string, base64: string): Promise<ImageUploadResult> {
+  // 如果使用模拟数据，则返回模拟数据
+  if (USE_MOCK) {
+    return getMockImageUpload();
+  }
+  
+  // 否则调用实际API
+  const options: RequestInit = {
+    method: 'POST',
+    body: JSON.stringify({ name, base64 }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+  
+  return request<ImageUploadResult>('/upload/image', options);
+}
+
+/**
+ * 生成视频拍摄脚本
+ * @param clothingImage 服装图片（Base64字符串或File对象）
+ * @param sceneImage 场景图片（Base64字符串或File对象）
+ * @param prompt 用户提示词
+ * @returns Promise<VideoScriptResult>
+ */
+export async function generateVideoScript(
+  clothingImage: string | File,
+  sceneImage: string | File,
+  prompt: string
+): Promise<VideoScriptResult> {
+  // 如果使用模拟数据，则返回模拟数据
+  if (USE_MOCK) {
+    return getMockVideoScriptResult();
+  }
+  
+  // 准备请求数据
+  const data: any = {
+    prompt: prompt
+  };
+  
+  // 处理服装图片
+  if (typeof clothingImage === 'string') {
+    // Base64字符串
+    data.clothingImage = clothingImage;
+  } else {
+    // 文件对象需要转换为Base64
+    data.clothingImage = await fileToBase64(clothingImage);
+  }
+  
+  // 处理场景图片
+  if (typeof sceneImage === 'string') {
+    // Base64字符串
+    data.sceneImage = sceneImage;
+  } else {
+    // 文件对象需要转换为Base64
+    data.sceneImage = await fileToBase64(sceneImage);
+  }
+  
+  // 调用实际API
+  const options: RequestInit = {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+  
+  return request<VideoScriptResult>('/generate/video-script', options);
+}
+
+/**
+ * 辅助函数：将File对象转换为Base64字符串
+ * @param file 文件对象
+ * @returns Promise<string> Base64字符串
+ */
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
 }

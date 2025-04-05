@@ -2,46 +2,72 @@ import React, { useState } from 'react';
 import {
     Typography,
     Card,
-    Form,
-    Input,
     Upload,
     Button,
     Space,
     Toast,
     Spin,
     Divider,
+    TextArea,
 } from '@douyinfe/semi-ui';
 import { IconUpload, IconCamera, IconPulse } from '@douyinfe/semi-icons';
-import { generateScript, ScriptResult } from '../components/apiService';
+import { generateVideoScript, VideoScriptResult } from '../components/apiService';
 
 const ScriptGenerator: React.FC = () => {
     const { Title, Paragraph, Text } = Typography;
     const [loading, setLoading] = useState<boolean>(false);
-    const [scriptResult, setScriptResult] = useState<ScriptResult | null>(null);
+    const [scriptResult, setScriptResult] = useState<VideoScriptResult | null>(null);
+    const [formValues, setFormValues] = useState({
+        clothingImage: '',
+        sceneImage: '',
+        prompt: '',
+        clothingImageError: '',
+        sceneImageError: '',
+        promptError: '',
+    });
     
     // 处理脚本生成表单提交
-    const handleGenerateScript = async (values: any) => {
+const handleGenerateScript = async () => {
+        // 表单验证
+        let hasError = false;
+        const newFormValues = {...formValues};
+
+        if (!formValues.clothingImage) {
+            newFormValues.clothingImageError = '请上传服装图片';
+            hasError = true;
+        } else {
+            newFormValues.clothingImageError = '';
+        }
+
+        if (!formValues.sceneImage) {
+            newFormValues.sceneImageError = '请上传场景图片';
+            hasError = true;
+        } else {
+            newFormValues.sceneImageError = '';
+        }
+
+        if (!formValues.prompt) {
+            newFormValues.promptError = '请输入提示词';
+            hasError = true;
+        } else {
+            newFormValues.promptError = '';
+        }
+
+        setFormValues(newFormValues);
+
+        if (hasError) {
+            return;
+        }
+        
         setLoading(true);
         
         try {
-            // 创建FormData对象用于发送文件和提示词
-            const formData = new FormData();
-            
-            // 添加服装图片
-            if (values.clothingImage && values.clothingImage.length > 0) {
-                formData.append('clothingImage', values.clothingImage[0].fileInstance);
-            }
-            
-            // 添加场景图片
-            if (values.sceneImage && values.sceneImage.length > 0) {
-                formData.append('sceneImage', values.sceneImage[0].fileInstance);
-            }
-            
-            // 添加提示词
-            formData.append('prompt', values.prompt);
-            
-            // 调用API服务
-            const result = await generateScript(formData);
+            // 调用API服务 - 按照函数定义传递三个单独的参数
+            const result = await generateVideoScript(
+                formValues.clothingImage,
+                formValues.sceneImage,
+                formValues.prompt
+            );
             setScriptResult(result);
             Toast.success('脚本生成成功！');
         } catch (error) {
@@ -56,83 +82,137 @@ const ScriptGenerator: React.FC = () => {
         <div style={{ padding: '20px' }}>
             <Title heading={2}>拍摄脚本生成</Title>
             <Card style={{ maxWidth: 800, margin: '20px 0' }}>
-                <Form onSubmit={values => handleGenerateScript(values)}>
-                    <Form.Upload
-                        field="clothingImage"
-                        label="服装图片"
-                        action=""
-                        accept="image/*"
-                        dragIcon={
-                            <div style={{ margin: 16, textAlign: 'center' }}>
-                                <IconUpload size="extra-large" style={{ color: 'var(--semi-color-primary)' }} />
-                                <div style={{ marginTop: 8, fontSize: 14, color: 'var(--semi-color-text-2)' }}>
-                                    点击或拖拽上传服装图片
+                <div style={{ padding: '16px 0' }}>
+                    <div style={{ marginBottom: '16px' }}>
+                        <div style={{ marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>服装图片</div>
+                        <Upload
+                            action=""
+                            accept="image/*"
+                            limit={1}
+                            dragIcon={
+                                <div style={{ margin: 16, textAlign: 'center' }}>
+                                    <IconUpload size="extra-large" style={{ color: 'var(--semi-color-primary)' }} />
+                                    <div style={{ marginTop: 8, fontSize: 14, color: 'var(--semi-color-text-2)' }}>
+                                        点击或拖拽上传服装图片
+                                    </div>
                                 </div>
-                            </div>
-                        }
-                        draggable
-                        validate={(fieldValue) => {
-                            if (!fieldValue || fieldValue.length === 0) {
-                                return '请上传服装图片';
                             }
-                        }}
-                        triggerRender={({ preview }) => preview}
-                    >
-                        {({previewFile, files}) => (
-                            <Upload.Preview type="image" listType="picture" files={files} />
+                            draggable
+                            customRequest={({ fileInstance, onSuccess }) => {
+                                // 文件转Base64字符串
+                                const reader = new FileReader();
+                                reader.readAsDataURL(fileInstance);
+                                reader.onload = () => {
+                                    // 保存Base64字符串
+                                    setFormValues(prev => ({
+                                        ...prev,
+                                        clothingImage: reader.result as string
+                                    }));
+                                    setTimeout(() => {
+                                        onSuccess({ response: '上传成功' });
+                                    }, 100);
+                                };
+                            }}
+                            onRemove={() => {
+                                setFormValues(prev => ({ ...prev, clothingImage: '' }));
+                                return true;
+                            }}
+                            showUploadList={true}
+                        >
+                        </Upload>
+                        {formValues.clothingImageError && (
+                            <div style={{ color: 'var(--semi-color-danger)', fontSize: '12px', marginTop: '4px' }}>
+                                {formValues.clothingImageError}
+                            </div>
                         )}
-                    </Form.Upload>
+                    </div>
                     
-                    <Form.Upload
-                        field="sceneImage"
-                        label="场景图片"
-                        action=""
-                        accept="image/*"
-                        dragIcon={
-                            <div style={{ margin: 16, textAlign: 'center' }}>
-                                <IconCamera size="extra-large" style={{ color: 'var(--semi-color-primary)' }} />
-                                <div style={{ marginTop: 8, fontSize: 14, color: 'var(--semi-color-text-2)' }}>
-                                    点击或拖拽上传场景图片
+                    <div style={{ marginBottom: '16px' }}>
+                        <div style={{ marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>场景图片</div>
+                        <Upload
+                            action=""
+                            accept="image/*"
+                            limit={1}
+                            dragIcon={
+                                <div style={{ margin: 16, textAlign: 'center' }}>
+                                    <IconCamera size="extra-large" style={{ color: 'var(--semi-color-primary)' }} />
+                                    <div style={{ marginTop: 8, fontSize: 14, color: 'var(--semi-color-text-2)' }}>
+                                        点击或拖拽上传场景图片
+                                    </div>
                                 </div>
+                            }
+                            draggable
+                            customRequest={({ fileInstance, onSuccess }) => {
+                                // 文件转Base64字符串
+                                const reader = new FileReader();
+                                reader.readAsDataURL(fileInstance);
+                                reader.onload = () => {
+                                    // 保存Base64字符串
+                                    setFormValues(prev => ({
+                                        ...prev,
+                                        sceneImage: reader.result as string
+                                    }));
+                                    setTimeout(() => {
+                                        onSuccess({ response: '上传成功' });
+                                    }, 100);
+                                };
+                            }}
+                            onRemove={() => {
+                                setFormValues(prev => ({ ...prev, sceneImage: '' }));
+                                return true;
+                            }}
+                            showUploadList={true}
+                        >
+                        </Upload>
+                        {formValues.sceneImageError && (
+                            <div style={{ color: 'var(--semi-color-danger)', fontSize: '12px', marginTop: '4px' }}>
+                                {formValues.sceneImageError}
                             </div>
-                        }
-                        draggable
-                        validate={(fieldValue) => {
-                            if (!fieldValue || fieldValue.length === 0) {
-                                return '请上传场景图片';
-                            }
-                        }}
-                        triggerRender={({ preview }) => preview}
-                    >
-                        {({previewFile, files}) => (
-                            <Upload.Preview type="image" listType="picture" files={files} />
                         )}
-                    </Form.Upload>
+                    </div>
                     
-                    <Form.TextArea
-                        field="prompt"
-                        label="提示词"
-                        placeholder="请输入提示词，例如：风格、主题、情感等关键词"
-                        rows={4}
-                        showClear
-                        validate={(fieldValue) => {
-                            if (!fieldValue) {
-                                return '请输入提示词';
-                            }
-                        }}
-                    />
+                    <div style={{ marginBottom: '24px' }}>
+                        <div style={{ marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>提示词</div>
+                        <TextArea
+                            placeholder="请输入提示词，例如：风格、主题、情感等关键词"
+                            rows={4}
+                            showClear
+                            value={formValues.prompt}
+                            onChange={(value) => setFormValues(prev => ({ ...prev, prompt: value }))}
+                        />
+                        {formValues.promptError && (
+                            <div style={{ color: 'var(--semi-color-danger)', fontSize: '12px', marginTop: '4px' }}>
+                                {formValues.promptError}
+                            </div>
+                        )}
+                    </div>
                     
                     <div style={{ marginTop: 24, textAlign: 'center' }}>
                         <Space>
-                            <Button type="primary" htmlType="submit" icon={<IconPulse />} loading={loading}>
+                            <Button 
+                                type="primary" 
+                                icon={<IconPulse />} 
+                                loading={loading}
+                                onClick={handleGenerateScript}
+                            >
                                 生成脚本
                             </Button>
-                            <Button type="tertiary" htmlType="reset">
+                            <Button 
+                                type="tertiary" 
+                                onClick={() => setFormValues({
+                                    clothingImage: '',
+                                    sceneImage: '',
+                                    prompt: '',
+                                    clothingImageError: '',
+                                    sceneImageError: '',
+                                    promptError: ''
+                                })}
+                            >
                                 重置
                             </Button>
                         </Space>
                     </div>
-                </Form>
+                </div>
             </Card>
             
             {loading && (
@@ -174,8 +254,44 @@ const ScriptGenerator: React.FC = () => {
                                     <Text>{scene.actions}</Text>
                                 </Paragraph>
                             )}
+                            
+                            {scene.shotType && (
+                                <Paragraph>
+                                    <Text strong>镜头类型：</Text>
+                                    <Text>{scene.shotType}</Text>
+                                </Paragraph>
+                            )}
+                            
+                            {scene.duration && (
+                                <Paragraph>
+                                    <Text strong>建议时长：</Text>
+                                    <Text>{scene.duration}</Text>
+                                </Paragraph>
+                            )}
                         </Card>
                     ))}
+                    
+                    {scriptResult.tips && (
+                        <Card style={{ marginTop: 16, marginBottom: 16 }}>
+                            <Title heading={5}>拍摄提示</Title>
+                            <Paragraph>
+                                <Text>{scriptResult.tips}</Text>
+                            </Paragraph>
+                        </Card>
+                    )}
+                    
+                    {scriptResult.equipment && scriptResult.equipment.length > 0 && (
+                        <Card style={{ marginTop: 16 }}>
+                            <Title heading={5}>推荐设备</Title>
+                            <Paragraph>
+                                <ul>
+                                    {scriptResult.equipment.map((item, index) => (
+                                        <li key={index}><Text>{item}</Text></li>
+                                    ))}
+                                </ul>
+                            </Paragraph>
+                        </Card>
+                    )}
                 </Card>
             )}
         </div>

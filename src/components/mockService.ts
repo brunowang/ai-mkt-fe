@@ -1,5 +1,5 @@
 // mockService.ts - 提供模拟数据用于本地开发和测试
-import { Video, UserProfile, ScriptResult } from './apiService';
+import { Video, UserProfile, ScriptResult, ImageUploadResult, VideoScriptResult } from './apiService';
 
 /**
  * 模拟视频数据
@@ -100,23 +100,78 @@ export async function getMockScriptResult(): Promise<ScriptResult> {
     content: "本脚本展示了一位年轻女性穿着轻盈夏日连衣裙在海滩上的惬意漫步场景。通过自然光线和慢节奏拍摄，突出服装的飘逸感和与海滩环境的和谐融合。",
     scenes: [
       {
-        description: "远景：模特从远处沙滩缓缓走来，裙摆随海风轻轻飘动",
-        actions: "摄影师使用广角镜头，从低角度拍摄，捕捉蓝天白云和金色沙滩的辽阔背景。"
+        description: "女主角穿着白色连衣裙，站在海滩边缘，迎着微风",
+        actions: "慢镜头展示裙摆在风中飘动，女主角从左至右漫步"
       },
       {
-        description: "中景：模特面向大海，裙子随风舞动",
-        actions: "使用慢动作拍摄，突出裙子面料的轻盈质感和飘逸感。"
+        description: "女主角走到一块礁石旁，坐下欣赏远处海景",
+        actions: "中景拍摄，突出服装与自然环境的和谐"
       },
       {
-        description: "特写：裙子面料与肌肤的贴合与分离",
-        dialogue: "旁白：'夏日的微风，轻盈的触感，尽在这款海滨系列连衣裙中'",
-        actions: "使用自然光线，拍摄模特转身时裙摆的动态美感。"
-      },
-      {
-        description: "收尾：模特漫步远去，融入到夕阳与大海的背景中",
-        dialogue: "旁白：'无论海滨度假还是城市漫步，尽显优雅气质'",
-        actions: "逐渐拉远镜头，展现整体环境与服装的和谐统一。"
+        description: "夕阳西下，女主角面对大海，裙子在金色阳光下闪耀",
+        dialogue: "生活就像海洋，只有意志坚强的人，才能到达彼岸"
       }
     ]
+  };
+}
+
+/**
+ * 模拟图片上传响应
+ * @returns Promise<ImageUploadResult>
+ */
+export async function getMockImageUpload(): Promise<ImageUploadResult> {
+  // 模拟网络延迟
+  await delay(1000);
+  
+  // 返回模拟数据
+  return {
+    url: "https://sf6-cdn-tos.douyinstatic.com/obj/eden-cn/ptlz_zlp/ljhwZthlaukjlkulzlp/root-web-sites/sample-image.jpg",
+    fileName: "sample-image.jpg",
+    fileSize: 1024 * 1024 * 2, // 模拟2MB大小
+    uploadTime: new Date().toISOString()
+  };
+}
+
+/**
+ * 模拟视频脚本生成结果
+ * @returns Promise<VideoScriptResult>
+ */
+export async function getMockVideoScriptResult(): Promise<VideoScriptResult> {
+  // 模拟网络延迟
+  await delay(1800);
+  
+  // 返回模拟数据
+  return {
+    title: "都市职场女性街拍视频",
+    content: "本脚本展现了一位职场女性在城市街道中展示时尚职业装的场景。通过动态拍摄和街景元素，突出服装的专业感和都市氛围的融合。",
+    scenes: [
+      {
+        description: "早晨，女主角穿着深蓝色职业套装，站在高楼前，准备开始新的一天",
+        shotType: "全景到特写过渡",
+        actions: "从远处拍摄，镜头逐渐拉近，展示女主角自信的表情和服装细节",
+        duration: "10秒"
+      },
+      {
+        description: "女主角行走在繁忙的街道上，周围是匆忙的上班族",
+        shotType: "跟随拍摄",
+        actions: "稳定器跟随拍摄，展示人物行走姿态和服装在动态中的效果",
+        duration: "15秒"
+      },
+      {
+        description: "午间休息，女主角在城市广场的咖啡座位上",
+        dialogue: "都市生活节奏快，但也要记得享受每一刻的美好",
+        shotType: "侧面中景",
+        actions: "拍摄女主角品尝咖啡的优雅姿态，突出服装与都市环境的和谐",
+        duration: "12秒"
+      },
+      {
+        description: "傍晚，夕阳下的摩天大楼前，女主角回望一天的忙碌",
+        shotType: "剪影效果",
+        actions: "逆光拍摄，创造剪影效果，展现都市职场女性的坚毅形象",
+        duration: "8秒"
+      }
+    ],
+    tips: "拍摄时注意捕捉城市特有的元素，如高楼、交通和人流，以增强都市感。尽量选择早晚光线较柔和的时间段拍摄。",
+    equipment: ["手机或单反相机", "稳定器", "广角镜头", "偏振滤镜（减少城市玻璃反光）"]
   };
 }
