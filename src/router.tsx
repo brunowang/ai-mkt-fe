@@ -1,7 +1,5 @@
 import {createHashRouter, Navigate} from 'react-router-dom';
-import Profile from './pages/Profile';
-import VideoList from './pages/VideoList';
-import ScriptGenerator from './pages/ScriptGenerator';
+import PlanList from './pages/PlanList';
 import App from './App';
 
 const router = createHashRouter([
@@ -10,20 +8,12 @@ const router = createHashRouter([
         element: <App/>,
         children: [
             {
-                path: 'profile',
-                element: <Profile/>
-            },
-            {
-                path: 'videos',
-                element: <VideoList/>
-            },
-            {
-                path: 'script-generator',
-                element: <ScriptGenerator/>
+                path: 'plans',
+                element: <PlanList/>
             },
             {
                 path: '',
-                element: <Navigate to="script-generator"/>
+                element: <Navigate to="plans"/>
             }
         ]
     }
