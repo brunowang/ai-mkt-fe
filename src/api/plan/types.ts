@@ -1,4 +1,5 @@
 export interface CreatePlanRequest {
+    user_id: string;
     name: string;
 }
 
